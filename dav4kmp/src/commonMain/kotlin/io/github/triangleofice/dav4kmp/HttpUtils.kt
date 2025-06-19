@@ -11,7 +11,7 @@ package io.github.triangleofice.dav4kmp
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Url
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.bits.withMemory
+import io.ktor.utils.io.peek
 import korlibs.time.DateFormat
 import korlibs.time.DateTime
 import korlibs.time.DateTimeTz
@@ -93,4 +93,4 @@ object HttpUtils {
     }
 }
 
-suspend fun ByteReadChannel.isEmpty() = isClosedForRead || withMemory(1) { mem -> peekTo(mem, 0, 0, 1, 1) } == 0L
+suspend fun ByteReadChannel.isEmpty() = isClosedForRead || peek(1) == null

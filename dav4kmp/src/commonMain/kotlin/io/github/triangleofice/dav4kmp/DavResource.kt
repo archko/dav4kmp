@@ -21,6 +21,7 @@ import io.github.triangleofice.dav4kmp.exception.UnauthorizedException
 import io.github.triangleofice.dav4kmp.property.SyncToken
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRedirect
+import io.ktor.client.plugins.HttpResponseRedirectEvent
 import io.ktor.client.plugins.pluginOrNull
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareRequest
@@ -41,14 +42,14 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
 import io.ktor.http.withCharset
-import io.ktor.util.InternalAPI
 import io.ktor.util.logging.Logger
-import io.ktor.utils.io.bits.loadByteArray
-import io.ktor.utils.io.bits.withMemory
+import io.ktor.utils.io.InternalAPI
 import io.ktor.utils.io.charsets.Charsets
-import io.ktor.utils.io.core.EOFException
 import io.ktor.utils.io.core.toByteArray
 import io.ktor.utils.io.errors.IOException
+import io.ktor.utils.io.peek
+import kotlinx.io.EOFException
+import kotlinx.io.bytestring.decodeToString
 import nl.adaptivity.xmlutil.QName
 import nl.adaptivity.xmlutil.XmlException
 import kotlin.coroutines.cancellation.CancellationException
@@ -154,7 +155,7 @@ open class DavResource @JvmOverloads constructor(
         this.location = location
         // Let the client follow redirects while we listen for changes
         require(httpClient.pluginOrNull(HttpRedirect) != null) { "httpClient must follow redirects automatically!" }
-        httpClient.monitor.subscribe(HttpRedirect.HttpResponseRedirect) { response ->
+        httpClient.monitor.subscribe(HttpResponseRedirectEvent) { response ->
             if (response.request.url != this.location || response.headers[HttpHeaders.Location] == null) return@subscribe
             this.location = URLBuilder(this.location).takeFrom(response.headers[HttpHeaders.Location]!!).build()
         }
@@ -629,7 +630,7 @@ open class DavResource @JvmOverloads constructor(
                 httpResponse = response,
             )
         }
-        val bodyChannel = response.content
+        val bodyChannel = response.rawContent
         log.trace("AssertMultiStatus: Checking if content is available ${response.contentLength()}->${bodyChannel.isClosedForRead}")
         if (response.contentLength() == 0L || bodyChannel.isEmpty()) {
             throw DavException(
@@ -644,16 +645,11 @@ open class DavResource @JvmOverloads constructor(
                    Some broken servers return an XML response with some other MIME type. So we try to see
                    whether the response is maybe XML although the Content-Type is something else. */
                 try {
-                    val firstBytes = ByteArray(XML_SIGNATURE.size)
                     log.trace("AssertMultiStatus: Malformed contentType $mimeType, checking for XML")
-                    withMemory(XML_SIGNATURE.size) { memory ->
-                        log.trace("AssertMultiStatus: Peeking into memory")
-                        bodyChannel.peekTo(memory, 0)
-                        log.trace("Got $memory")
-                        memory.loadByteArray(0, firstBytes)
-                    }
-                    log.trace("AssertMultiStatus: First bytes were ${firstBytes.decodeToString()}")
-                    if (XML_SIGNATURE.contentEquals(firstBytes)) {
+                    val firstBytes = bodyChannel.peek(XML_SIGNATURE.size)
+
+                    log.trace("AssertMultiStatus: First bytes were ${firstBytes?.decodeToString()}")
+                    if (XML_SIGNATURE.contentEquals(firstBytes?.toByteArray())) {
                         Dav4jvm.log.warn("Received 207 Multi-Status that seems to be XML but has MIME type $mimeType")
 
                         // response is OK, return and do not throw Exception below

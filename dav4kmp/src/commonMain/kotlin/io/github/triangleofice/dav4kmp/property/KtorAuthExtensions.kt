@@ -8,14 +8,14 @@
 
 package io.github.triangleofice.dav4kmp.property
 
-import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.AuthConfig
 import io.ktor.client.plugins.auth.AuthProvider
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.auth.HttpAuthHeader
 
-fun Auth.forDomain(pattern: String, block: Auth.() -> Unit) = forDomain(pattern.toRegex(), block)
+fun AuthConfig.forDomain(pattern: String, block: AuthConfig.() -> Unit) = forDomain(pattern.toRegex(), block)
 
-fun Auth.forDomain(pattern: Regex, block: Auth.() -> Unit) {
+fun AuthConfig.forDomain(pattern: Regex, block: AuthConfig.() -> Unit) {
     val old = this.providers.toSet()
     block()
     val newProviders = providers - old
