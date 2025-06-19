@@ -24,9 +24,9 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.headersOf
 import io.ktor.http.takeFrom
-import io.ktor.util.InternalAPI
 import io.ktor.util.date.GMTDate
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.InternalAPI
 import korlibs.time.DateTime
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Job

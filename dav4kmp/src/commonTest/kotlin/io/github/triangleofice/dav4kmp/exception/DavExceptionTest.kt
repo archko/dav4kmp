@@ -34,7 +34,6 @@ import io.ktor.http.Url
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import io.ktor.http.withCharset
-import io.ktor.util.InternalAPI
 import io.ktor.utils.io.charsets.Charsets
 import nl.adaptivity.xmlutil.QName
 import kotlin.test.assertEquals
@@ -42,7 +41,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-@OptIn(InternalAPI::class)
 object DavExceptionTest : FunSpec({
     val sampleText = "SAMPLE RESPONSE"
 

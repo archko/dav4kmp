@@ -17,9 +17,11 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.contentType
-import io.ktor.util.InternalAPI
+import io.ktor.utils.io.InternalAPI
 import io.ktor.utils.io.core.readBytes
 import io.ktor.utils.io.errors.IOException
+import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readText
 import nl.adaptivity.xmlutil.XmlException
 import kotlin.math.min
 
@@ -97,7 +99,7 @@ open class DavException internal constructor(
                 Dav4jvm.log.trace("Reading response $response")
                 try {
                     // save response body excerpt
-                    val bodyChannel = httpResponse.content
+                    val bodyChannel = httpResponse.rawContent
                     val contentType = httpResponse.contentType()
                     if (!bodyChannel.isEmpty() && contentType != null && isPlainText(contentType)) {
                         // Read a length limited version of the body
