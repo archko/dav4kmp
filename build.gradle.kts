@@ -1,18 +1,64 @@
-/*
- *
- *  * This Source Code Form is subject to the terms of the Mozilla Public
- *  * License, v. 2.0. If a copy of the MPL was not distributed with this
- *  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
- */
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.androidLibrary) apply false
-    alias(libs.plugins.kotlinMultiplatform) apply  false
-    alias(libs.plugins.vanniktech.mavenPublish) apply false
-    alias(libs.plugins.dokka)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.androidLibrary)
 }
 
-tasks.dokkaHtmlMultiModule {
-    moduleName.set("dav4kmp")
+kotlin {
+    jvmToolchain(17)
+    explicitApi()
+
+    jvm()
+    androidTarget {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+
+    //iosX64()
+    //iosArm64()
+    //iosSimulatorArm64()
+    //linuxX64()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(compose.foundation)
+                implementation(compose.runtime)
+                api(libs.ktor.client.core)
+                api(libs.ktor.client.auth)
+                implementation(libs.xmlutil.core)
+                implementation(libs.klock)
+            }
+        }
+        /*val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotest.framework.engine)
+                implementation(libs.kotest.framework.datatest)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.ktor.client.mock)
+                implementation(libs.ktor.client.auth)
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.kotest.runner.junit5)
+                implementation(libs.kotlinx.coroutines.debug)
+                implementation(libs.logback.classic)
+            }
+        }*/
+    }
+}
+
+android {
+    namespace = "io.github.triangleofice"
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    defaultConfig {
+        minSdk = libs.versions.android.minSdk.get().toInt()
+    }
 }
