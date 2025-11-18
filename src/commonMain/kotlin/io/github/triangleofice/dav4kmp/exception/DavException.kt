@@ -11,6 +11,7 @@ package io.github.triangleofice.dav4kmp.exception
 import io.github.triangleofice.dav4kmp.Dav4jvm
 import io.github.triangleofice.dav4kmp.Error
 import io.github.triangleofice.dav4kmp.XmlUtils
+import io.github.triangleofice.dav4kmp.exception.DavException.Companion.MAX_EXCERPT_SIZE
 import io.github.triangleofice.dav4kmp.isEmpty
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
@@ -18,10 +19,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.contentType
 import io.ktor.utils.io.InternalAPI
-import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.errors.IOException
 import io.ktor.utils.io.readRemaining
 import io.ktor.utils.io.readText
+import kotlinx.io.IOException
+import kotlinx.io.readByteArray
 import nl.adaptivity.xmlutil.XmlException
 import kotlin.math.min
 
@@ -63,7 +64,7 @@ public open class DavException internal constructor(
         internal suspend fun createExceptionData(
             httpResponse: HttpResponse? = null,
         ): ExceptionData {
-            var response: String? = null
+            var response: String?
             var request: String? = null
             var requestBody: String? = null
             var responseBody: String? = null
@@ -104,9 +105,10 @@ public open class DavException internal constructor(
                     if (!bodyChannel.isEmpty() && contentType != null && isPlainText(contentType)) {
                         // Read a length limited version of the body
                         val read = bodyChannel.readRemaining(MAX_EXCERPT_SIZE.toLong())
-                        responseBody = read.readBytes().decodeToString()
+                        responseBody = read.readByteArray().decodeToString()
                         if (contentType.match(ContentType.Application.Xml) || contentType.match(ContentType.Text.Xml)) {
-                            val xmlBody = responseBody + bodyChannel.readRemaining().readBytes().decodeToString()
+                            val xmlBody = responseBody + bodyChannel.readRemaining().readByteArray()
+                                .decodeToString()
                             try {
                                 val parser = XmlUtils.createReader(xmlBody)
                                 XmlUtils.processTag(parser, name = Error.NAME) {

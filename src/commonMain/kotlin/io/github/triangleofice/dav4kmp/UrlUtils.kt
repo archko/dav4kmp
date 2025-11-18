@@ -88,7 +88,7 @@ public object UrlUtils {
      * @return URL without trailing slash (except when the path is the root path), e.g. `http://host/test1`
      */
     public fun omitTrailingSlash(url: Url): Url {
-        val hasTrailingSlash = url.pathSegments.last() == ""
+        val hasTrailingSlash = url.rawSegments.last() == ""
 
         return if (hasTrailingSlash) {
             URLBuilder(url).apply { pathSegments = pathSegments.dropLast(1) }.build()
@@ -105,7 +105,7 @@ public object UrlUtils {
      * @return URL with trailing slash, e.g. `http://host/test1/`
      */
     public fun withTrailingSlash(url: Url): Url {
-        val hasTrailingSlash = url.pathSegments.last() == ""
+        val hasTrailingSlash = url.rawSegments.last() == ""
 
         return if (hasTrailingSlash) {
             url

@@ -40,6 +40,5 @@ public fun interface ResponseCallback {
      * Called for a HTTP response. Typically this is only called for successful/redirect
      * responses because HTTP errors throw an exception before this callback is called.
      */
-    @Suppress("FUN_INTERFACE_WITH_SUSPEND_FUNCTION")
     public suspend fun onResponse(response: HttpResponse)
 }

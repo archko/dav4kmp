@@ -58,7 +58,7 @@ public object HttpUtils {
      * @return resource name
      */
     public fun fileName(url: Url): String {
-        val pathSegments = url.pathSegments.dropLastWhile { it == "" }
+        val pathSegments = url.rawSegments.dropLastWhile { it == "" }
         return pathSegments.lastOrNull() ?: ""
     }
 
