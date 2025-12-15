@@ -24,6 +24,8 @@ kotlin {
     //linuxX64()
 
     sourceSets {
+        androidMain.dependencies {
+        }
         commonMain {
             dependencies {
                 implementation(compose.foundation)
@@ -60,5 +62,10 @@ android {
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
